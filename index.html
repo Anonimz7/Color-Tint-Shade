@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎨 Color Generator + Particles.js</title>
+    <title>🎨 Color Generator + Particles.js (Final Responsive Fix)</title>
     <style>
         /* Variabel CSS untuk Dark/Light Mode */
         :root {
@@ -28,7 +28,6 @@
         /* --- Global Styling --- */
         body {
             font-family: 'Inter', sans-serif;
-            /* Hapus background-color dari body agar partikel terlihat */
             color: var(--text-primary);
             display: flex;
             justify-content: center;
@@ -38,6 +37,27 @@
             padding: 20px;
             transition: color 0.3s;
         }
+        
+        /* Kontainer Utama - Tambahkan padding horizontal yang aman untuk mobile */
+        .container {
+            position: relative;
+            z-index: 10;
+            background-color: color-mix(in srgb, var(--bg-secondary) 95%, transparent);
+            backdrop-filter: blur(5px);
+            padding: 30px 40px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-light);
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+            /* Perbaikan Responsif: Pastikan padding aman */
+            padding-left: 15px;
+            padding-right: 15px;
+            box-sizing: border-box; /* Sangat Penting */
+        }
+
+        h1 { color: var(--accent-color); margin-bottom: 5px; font-size: 2.5em; }
+        p.subtitle { color: var(--text-secondary); margin-bottom: 30px; }
 
         /* --- Particle Container Styling --- */
         #particles-js {
@@ -46,32 +66,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: var(--bg-primary); /* Ambil warna dari variabel utama */
-            z-index: -1; /* Pastikan di belakang semua konten */
+            background-color: var(--bg-primary);
+            z-index: -1;
             transition: background-color 0.3s;
         }
-        body.dark-mode #particles-js {
-            background-color: var(--bg-primary); /* Latar belakang mode gelap */
-        }
-        
-        .container {
-            /* Pastikan konten di atas partikel */
-            position: relative;
-            z-index: 10;
-            
-            background-color: var(--bg-secondary);
-            padding: 30px 40px;
-            border-radius: 16px;
-            box-shadow: var(--shadow-light);
-            width: 100%;
-            max-width: 1200px;
-            text-align: center;
-            /* Tambahkan sedikit transparansi agar partikel terlihat */
-            background-color: color-mix(in srgb, var(--bg-secondary) 95%, transparent);
-            backdrop-filter: blur(5px); /* Efek blur opsional */
-        }
-        
-        /* [SISANYA CSS LAMA TENTANG GRID, BOX, DLL. TETAP SAMA] */
 
         /* --- Control Sections --- */
         .controls-grid {
@@ -94,11 +92,24 @@
         label { font-weight: 600; color: var(--text-primary); margin-bottom: 5px; }
 
         input[type="color"] { width: 50px; height: 50px; border: 2px solid var(--border-color); border-radius: 10px; cursor: pointer; padding: 0; overflow: hidden; }
+        /* Perbaikan Responsif: Hex Input diperkecil */
         input[type="text"] {
-            padding: 10px 15px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1em; width: 100px; text-align: center; outline: none; background-color: var(--bg-secondary); color: var(--text-primary); transition: border-color 0.2s;
+            padding: 10px 10px; /* Padding dikurangi */
+            border: 1px solid var(--border-color); 
+            border-radius: 8px; 
+            font-size: 1em; 
+            width: 80px; /* Lebar dikurangi */
+            text-align: center; 
+            outline: none; 
+            background-color: var(--bg-secondary); 
+            color: var(--text-primary); 
+            transition: border-color 0.2s;
         }
+        /* Perbaikan Responsif: Range Slider diperluas */
         input[type="range"] {
-            width: 150px; -webkit-appearance: none; height: 8px; background: var(--border-color); border-radius: 5px; outline: none;
+            width: 100%; /* Penuh di dalam control-row */
+            max-width: 150px; /* Batasi lebar maksimum */
+            -webkit-appearance: none; height: 8px; background: var(--border-color); border-radius: 5px; outline: none;
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent-color); cursor: pointer; border: 3px solid var(--bg-secondary); box-shadow: 0 0 5px rgba(0,0,0,0.2);
@@ -112,6 +123,20 @@
         #darkModeToggle {
             background-color: var(--text-secondary); color: var(--bg-secondary); border: none; padding: 8px 15px; border-radius: 50px; cursor: pointer; position: absolute; top: 20px; right: 20px; transition: background-color 0.3s;
         }
+
+        /* Perbaikan Responsif: Sesuaikan posisi tombol di mobile */
+        @media (max-width: 600px) {
+            #darkModeToggle {
+                top: 10px;
+                right: 10px;
+                padding: 6px 10px;
+                font-size: 0.8em;
+            }
+            .container {
+                padding-top: 50px; /* Beri ruang agar tombol tidak menutupi judul */
+            }
+            h1 { font-size: 2em; }
+        }
         
         /* --- Palette Display --- */
         .palette-container {
@@ -123,6 +148,7 @@
             border-radius: 10px;
             overflow: hidden;
             border: 1px solid var(--border-color);
+            box-sizing: border-box; /* Pastikan border dihitung di dalam lebar */
         }
 
         .color-box {
@@ -164,19 +190,55 @@
         .color-box.drop-left { box-shadow: inset 3px 0 0 0 #f39c12, 0 5px 15px rgba(0,0,0,0.2); }
         .color-box.drop-right { box-shadow: inset -3px 0 0 0 #f39c12, 0 5px 15px rgba(0,0,0,0.2); }
 
-        /* --- Media Queries (Tetap Sama) --- */
+        /* --- Media Queries --- */
+        
+        /* Tablet/Layar Sedang (Lebar < 900px) - Menggunakan 8 kolom */
         @media (max-width: 900px) {
-            .controls-grid { grid-template-columns: 1fr 1fr; }
+            .controls-grid { 
+                grid-template-columns: 1fr 1fr; 
+                gap: 15px; /* Kurangi gap */
+                padding: 15px;
+            }
             .controls-grid > div:nth-child(3) { grid-column: 1 / span 2; }
-            .color-box { width: calc(100% / 8); } 
+            
+            /* Warna kotak 8 kolom */
+            .color-box { width: calc(100% / 8); min-width: unset; height: 100px; } 
+            
+            /* Atur ulang border kanan untuk grid 8 kolom */
             .color-box:nth-child(12n) { border-right: 1px solid rgba(255, 255, 255, 0.1); }
             .color-box:nth-child(8n) { border-right: none; }
         }
 
+        /* Mobile (Lebar < 600px) - Menggunakan 4 kolom */
         @media (max-width: 600px) {
-            .controls-grid { grid-template-columns: 1fr; }
-            .controls-grid > div:nth-child(3), .control-group { grid-column: 1; }
-            .color-box { width: calc(100% / 4); min-width: 50px; height: 80px; font-size: 0.7em; } 
+            /* Kontainer kontrol menjadi 1 kolom penuh */
+            .controls-grid { 
+                grid-template-columns: 1fr; 
+                gap: 15px;
+            }
+            .controls-grid > div { 
+                grid-column: 1; /* Semua item ke kolom 1 */
+            }
+            
+            /* Perbaikan Responsif: Lebar range slider full */
+            .control-row {
+                flex-wrap: nowrap; /* Cegah wrap */
+            }
+            input[type="range"] {
+                width: 100%; /* Lebar penuh */
+                max-width: none; /* Hapus batasan max-width */
+            }
+            
+            /* Warna kotak 4 kolom */
+            .color-box { 
+                width: calc(100% / 4); 
+                min-width: unset; 
+                height: 80px; 
+                font-size: 0.65em; /* Font lebih kecil */
+                padding-bottom: 5px;
+            } 
+            
+            /* Atur ulang border kanan untuk grid 4 kolom */
             .color-box:nth-child(8n) { border-right: 1px solid rgba(255, 255, 255, 0.1); }
             .color-box:nth-child(4n) { border-right: none; }
         }
@@ -231,7 +293,7 @@
             <div class="control-group" style="grid-column: 1 / span 3;">
                 <label for="hueSlider">Geser Nada Warna (Hue Shifter)</label>
                 <div class="control-row">
-                    <input type="range" id="hueSlider" min="0" max="360" value="204" style="width: 80%;">
+                    <input type="range" id="hueSlider" min="0" max="360" value="204" style="width: 80%;"> 
                     <span id="hueValue">204°</span>
                 </div>
             </div>
@@ -300,8 +362,8 @@
                 return [r, g, b];
             }
             // --- Akhir Color Conversion Helpers ---
-
-            // [LOGIKA DRAG, PALET, NOTIFIKASI TETAP SAMA]
+            
+            // [LOGIKA DRAG, PALET, NOTIFIKASI, DAN SINKRONISASI TETAP SAMA]
             function addDragAndDropListeners(element) {
                 element.setAttribute('draggable', 'true');
                 element.addEventListener('dragstart', (e) => {
@@ -416,25 +478,18 @@
                     notification.classList.remove('show');
                 }, 2000);
             }
-
-            // --- Logika Sinkronisasi Hue (FIXED) ---
+            
             const updateBaseColorFromHue = () => {
                 const newH = parseInt(hueSlider.value);
-                
                 const hex = baseColorPicker.value;
                 if (!/^#([0-9A-F]{3}([0-9A-F]{3})?)$/i.test(hex)) return;
-                
                 const [r, g, b] = hexToRgb(hex);
                 const [oldH, s, l] = rgbToHsl(r, g, b); 
-                
-                // Gunakan modulo untuk mengatasi bug 360/0
                 const calculationH = newH % 360;
                 const [newR, newG, newB] = hslToRgb(calculationH, s, l);
                 const newHex = rgbToHex(newR, newG, newB);
-                
                 baseColorPicker.value = newHex;
                 baseColorHexInput.value = newHex;
-                
                 regenerate();
             };
 
@@ -443,117 +498,50 @@
                 if (!/^#([0-9A-F]{3}([0-9A-F]{3})?)$/i.test(hex)) {
                     return;
                 }
-                
                 const [r, g, b] = hexToRgb(hex);
                 const [h, s, l] = rgbToHsl(r, g, b);
-                
                 hueSlider.value = h;
-                
                 regenerate();
             };
             
             // --- Particles.js Initialization ---
             const initParticles = () => {
-                 // Konfigurasi Partikel (Gaya "Bintang" Sederhana)
                 particlesJS('particles-js', {
                     "particles": {
                         "number": {
                             "value": 80,
-                            "density": {
-                                "enable": true,
-                                "value_area": 800
-                            }
+                            "density": { "enable": true, "value_area": 800 }
                         },
-                        "color": {
-                            "value": "#ffffff" /* Warna partikel */
-                        },
-                        "shape": {
-                            "type": "circle",
-                            "stroke": {
-                                "width": 0,
-                                "color": "#000000"
-                            },
-                        },
-                        "opacity": {
-                            "value": 0.5,
-                            "random": false,
-                            "anim": {
-                                "enable": false,
-                                "speed": 1,
-                                "opacity_min": 0.1,
-                                "sync": false
-                            }
-                        },
-                        "size": {
-                            "value": 3,
-                            "random": true,
-                            "anim": {
-                                "enable": false,
-                                "speed": 40,
-                                "size_min": 0.1,
-                                "sync": false
-                            }
-                        },
-                        "line_linked": {
-                            "enable": true,
-                            "distance": 150,
-                            "color": "#ffffff",
-                            "opacity": 0.4,
-                            "width": 1
-                        },
-                        "move": {
-                            "enable": true,
-                            "speed": 6,
-                            "direction": "none",
-                            "random": false,
-                            "straight": false,
-                            "out_mode": "out",
-                            "bounce": false,
-                            "attract": {
-                                "enable": false,
-                                "rotateX": 600,
-                                "rotateY": 1200
-                            }
-                        }
+                        "color": { "value": "#ffffff" },
+                        "shape": { "type": "circle", "stroke": { "width": 0, "color": "#000000" } },
+                        "opacity": { "value": 0.5, "random": false, "anim": { "enable": false } },
+                        "size": { "value": 3, "random": true, "anim": { "enable": false } },
+                        "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.4, "width": 1 },
+                        "move": { "enable": true, "speed": 6, "direction": "none", "random": false, "straight": false, "out_mode": "out", "bounce": false }
                     },
                     "interactivity": {
                         "detect_on": "canvas",
                         "events": {
-                            "onhover": {
-                                "enable": true,
-                                "mode": "grab" /* Mode interaksi saat hover */
-                            },
-                            "onclick": {
-                                "enable": true,
-                                "mode": "push" /* Mode interaksi saat klik */
-                            },
+                            "onhover": { "enable": true, "mode": "grab" },
+                            "onclick": { "enable": true, "mode": "push" },
                             "resize": true
                         },
                         "modes": {
-                            "grab": {
-                                "distance": 140,
-                                "line_linked": {
-                                    "opacity": 1
-                                }
-                            },
-                            "push": {
-                                "particles_number": 4
-                            },
+                            "grab": { "distance": 140, "line_linked": { "opacity": 1 } },
+                            "push": { "particles_number": 4 }
                         }
                     },
                     "retina_detect": true
                 });
             };
-            // Panggil inisialisasi partikel
             initParticles();
 
-            // Dark Mode Toggle (Diperbarui untuk mengubah warna partikel di Dark Mode)
+            // Dark Mode Toggle
             darkModeToggle.addEventListener('click', () => {
                 document.body.classList.toggle('dark-mode');
                 const isDarkMode = document.body.classList.contains('dark-mode');
                 darkModeToggle.textContent = isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode';
 
-                // Opsional: Ubah warna partikel saat mode berubah
                 const particleColor = isDarkMode ? "#f0f0f0" : "#2c3e50";
                 if (window.pJSDom && window.pJSDom.length > 0) {
                     window.pJSDom[0].pJS.particles.color.value = particleColor;
@@ -571,7 +559,7 @@
                 generatePalette(hex, hue, weight, totalBoxes);
             };
 
-            // Event Listeners (Tetap Sama)
+            // Event Listeners
             baseColorPicker.addEventListener('input', updateHueSliderFromBase);
             baseColorHexInput.addEventListener('input', updateHueSliderFromBase); 
             hueSlider.addEventListener('input', updateBaseColorFromHue); 
