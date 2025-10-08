@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎨 Color Generator - Final Fix Synchronization</title>
+    <title>🎨 Color Generator + Particles.js</title>
     <style>
         /* Variabel CSS untuk Dark/Light Mode */
         :root {
@@ -28,7 +28,7 @@
         /* --- Global Styling --- */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-primary);
+            /* Hapus background-color dari body agar partikel terlihat */
             color: var(--text-primary);
             display: flex;
             justify-content: center;
@@ -36,10 +36,29 @@
             min-height: 100vh;
             margin: 0;
             padding: 20px;
-            transition: background-color 0.3s, color 0.3s;
+            transition: color 0.3s;
         }
 
+        /* --- Particle Container Styling --- */
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-primary); /* Ambil warna dari variabel utama */
+            z-index: -1; /* Pastikan di belakang semua konten */
+            transition: background-color 0.3s;
+        }
+        body.dark-mode #particles-js {
+            background-color: var(--bg-primary); /* Latar belakang mode gelap */
+        }
+        
         .container {
+            /* Pastikan konten di atas partikel */
+            position: relative;
+            z-index: 10;
+            
             background-color: var(--bg-secondary);
             padding: 30px 40px;
             border-radius: 16px;
@@ -47,10 +66,12 @@
             width: 100%;
             max-width: 1200px;
             text-align: center;
+            /* Tambahkan sedikit transparansi agar partikel terlihat */
+            background-color: color-mix(in srgb, var(--bg-secondary) 95%, transparent);
+            backdrop-filter: blur(5px); /* Efek blur opsional */
         }
-
-        h1 { color: var(--accent-color); margin-bottom: 5px; font-size: 2.5em; }
-        p.subtitle { color: var(--text-secondary); margin-bottom: 30px; }
+        
+        /* [SISANYA CSS LAMA TENTANG GRID, BOX, DLL. TETAP SAMA] */
 
         /* --- Control Sections --- */
         .controls-grid {
@@ -165,8 +186,12 @@
         }
         .notification.show { opacity: 1; visibility: visible; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 </head>
 <body class="dark-mode"> 
+    
+    <div id="particles-js"></div>
+    
     <div class="container">
         <button id="darkModeToggle">☀️ Light Mode</button>
         <h1>Color Pallete Mixer</h1>
@@ -235,7 +260,7 @@
 
             let draggedElement = null;
 
-            // --- Color Conversion Helpers (Diperkuat untuk 3/6 digit hex) ---
+            // --- Color Conversion Helpers (Tetap Sama) ---
             function hslToRgb(h, s, l) {
                 s /= 100; l /= 100;
                 let c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2, r = 0, g = 0, b = 0;
@@ -265,7 +290,6 @@
             }
 
             function hexToRgb(hex) {
-                // Handle 3-digit hex by expanding it to 6 digits
                 if (hex.length === 4) {
                     hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
                 }
@@ -277,7 +301,7 @@
             }
             // --- Akhir Color Conversion Helpers ---
 
-            // --- Drag and Drop Logic (tetap sama) ---
+            // [LOGIKA DRAG, PALET, NOTIFIKASI TETAP SAMA]
             function addDragAndDropListeners(element) {
                 element.setAttribute('draggable', 'true');
                 element.addEventListener('dragstart', (e) => {
@@ -318,18 +342,14 @@
                     draggedElement = null;
                 });
             }
-            // --- Akhir Drag and Drop Logic ---
 
-            // --- Main Palette Generation Logic ---
             function getContrastTextColor(hexColor) {
-                // ... (fungsi konversi kontras)
                 const [r, g, b] = hexToRgb(hexColor);
                 const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
                 return luminance > 0.55 ? 'black' : 'white';
             }
             
             function createColorBox(hexColor) {
-                // ... (fungsi membuat kotak warna)
                 const colorBox = document.createElement('div');
                 colorBox.classList.add('color-box');
                 colorBox.style.backgroundColor = hexColor;
@@ -357,11 +377,9 @@
                 if (currentHue !== null) {
                     h = parseInt(currentHue);
                 } else {
-                    // Sinkronkan Hue Slider jika generate dipicu oleh Color Picker/Hex Input
                     hueSlider.value = h; 
                 }
                 
-                // Gunakan HUE % 360 untuk memastikan nilai HUE yang digunakan dalam perhitungan ada di rentang 0-359
                 const calculationHue = h % 360; 
 
                 hueValueSpan.textContent = `${h}°`;
@@ -374,7 +392,6 @@
 
                 const generatedBoxes = [];
 
-                // 1. Generate Shades
                 for (let i = numSteps; i >= 1; i--) {
                     const shadeL = Math.max(0, l - (shadeStep * i));
                     const [shadeR, shadeG, shadeB] = hslToRgb(calculationHue, s, shadeL);
@@ -382,7 +399,6 @@
                     generatedBoxes.push(createColorBox(shadeHex));
                 }
                 
-                // 2. Generate Tints
                 for (let i = 1; i <= numSteps; i++) {
                     const tintL = Math.min(100, l + (tintStep * i));
                     const [tintR, tintG, tintB] = hslToRgb(calculationHue, s, tintL);
@@ -394,7 +410,6 @@
             }
 
             function showNotification(message) {
-                // ... (fungsi notifikasi)
                 notification.textContent = message;
                 notification.classList.add('show');
                 setTimeout(() => {
@@ -402,33 +417,27 @@
                 }, 2000);
             }
 
-            // --- Event Handlers ---
-
-            // FUNGSI INTI PERBAIKAN: HUE SLIDER -> BASE COLOR
+            // --- Logika Sinkronisasi Hue (FIXED) ---
             const updateBaseColorFromHue = () => {
                 const newH = parseInt(hueSlider.value);
                 
-                // 1. Ambil S dan L yang paling akurat dari HEX saat ini
                 const hex = baseColorPicker.value;
                 if (!/^#([0-9A-F]{3}([0-9A-F]{3})?)$/i.test(hex)) return;
                 
                 const [r, g, b] = hexToRgb(hex);
                 const [oldH, s, l] = rgbToHsl(r, g, b); 
                 
-                // 2. Gunakan fungsi HSL kustom kita untuk mendapatkan HEX baru
-                // Gunakan newH % 360 untuk mengatasi bug 360/0
+                // Gunakan modulo untuk mengatasi bug 360/0
                 const calculationH = newH % 360;
                 const [newR, newG, newB] = hslToRgb(calculationH, s, l);
                 const newHex = rgbToHex(newR, newG, newB);
                 
-                // 3. Perbarui input warna dasar
                 baseColorPicker.value = newHex;
                 baseColorHexInput.value = newHex;
                 
                 regenerate();
             };
 
-            // FUNGSI INTI PERBAIKAN: BASE COLOR -> HUE SLIDER
             const updateHueSliderFromBase = () => {
                 const hex = baseColorPicker.value;
                 if (!/^#([0-9A-F]{3}([0-9A-F]{3})?)$/i.test(hex)) {
@@ -438,17 +447,118 @@
                 const [r, g, b] = hexToRgb(hex);
                 const [h, s, l] = rgbToHsl(r, g, b);
                 
-                // Perbarui Hue Slider
                 hueSlider.value = h;
                 
                 regenerate();
             };
+            
+            // --- Particles.js Initialization ---
+            const initParticles = () => {
+                 // Konfigurasi Partikel (Gaya "Bintang" Sederhana)
+                particlesJS('particles-js', {
+                    "particles": {
+                        "number": {
+                            "value": 80,
+                            "density": {
+                                "enable": true,
+                                "value_area": 800
+                            }
+                        },
+                        "color": {
+                            "value": "#ffffff" /* Warna partikel */
+                        },
+                        "shape": {
+                            "type": "circle",
+                            "stroke": {
+                                "width": 0,
+                                "color": "#000000"
+                            },
+                        },
+                        "opacity": {
+                            "value": 0.5,
+                            "random": false,
+                            "anim": {
+                                "enable": false,
+                                "speed": 1,
+                                "opacity_min": 0.1,
+                                "sync": false
+                            }
+                        },
+                        "size": {
+                            "value": 3,
+                            "random": true,
+                            "anim": {
+                                "enable": false,
+                                "speed": 40,
+                                "size_min": 0.1,
+                                "sync": false
+                            }
+                        },
+                        "line_linked": {
+                            "enable": true,
+                            "distance": 150,
+                            "color": "#ffffff",
+                            "opacity": 0.4,
+                            "width": 1
+                        },
+                        "move": {
+                            "enable": true,
+                            "speed": 6,
+                            "direction": "none",
+                            "random": false,
+                            "straight": false,
+                            "out_mode": "out",
+                            "bounce": false,
+                            "attract": {
+                                "enable": false,
+                                "rotateX": 600,
+                                "rotateY": 1200
+                            }
+                        }
+                    },
+                    "interactivity": {
+                        "detect_on": "canvas",
+                        "events": {
+                            "onhover": {
+                                "enable": true,
+                                "mode": "grab" /* Mode interaksi saat hover */
+                            },
+                            "onclick": {
+                                "enable": true,
+                                "mode": "push" /* Mode interaksi saat klik */
+                            },
+                            "resize": true
+                        },
+                        "modes": {
+                            "grab": {
+                                "distance": 140,
+                                "line_linked": {
+                                    "opacity": 1
+                                }
+                            },
+                            "push": {
+                                "particles_number": 4
+                            },
+                        }
+                    },
+                    "retina_detect": true
+                });
+            };
+            // Panggil inisialisasi partikel
+            initParticles();
 
-            // Dark Mode Toggle
+            // Dark Mode Toggle (Diperbarui untuk mengubah warna partikel di Dark Mode)
             darkModeToggle.addEventListener('click', () => {
                 document.body.classList.toggle('dark-mode');
                 const isDarkMode = document.body.classList.contains('dark-mode');
                 darkModeToggle.textContent = isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode';
+
+                // Opsional: Ubah warna partikel saat mode berubah
+                const particleColor = isDarkMode ? "#f0f0f0" : "#2c3e50";
+                if (window.pJSDom && window.pJSDom.length > 0) {
+                    window.pJSDom[0].pJS.particles.color.value = particleColor;
+                    window.pJSDom[0].pJS.fn.particlesDraw();
+                }
             });
             
             // Generate Trigger function
@@ -461,26 +571,18 @@
                 generatePalette(hex, hue, weight, totalBoxes);
             };
 
-            // --- Koneksi Event Listeners ---
-            
-            // Base Color Input (Picker/Hex) memicu update slider HUE dan palet
+            // Event Listeners (Tetap Sama)
             baseColorPicker.addEventListener('input', updateHueSliderFromBase);
             baseColorHexInput.addEventListener('input', updateHueSliderFromBase); 
-
-            // Slider Hue memicu update Base Color dan palet
             hueSlider.addEventListener('input', updateBaseColorFromHue); 
-            
-            // Slider Weight dan Steps
             weightSlider.addEventListener('input', regenerate);
             weightSlider.addEventListener('input', () => { weightValueSpan.textContent = weightSlider.value; });
             stepsSlider.addEventListener('input', regenerate);
             stepsSlider.addEventListener('input', () => { totalBoxesSpan.textContent = stepsSlider.value; });
 
             // Inisialisasi awal
-            // Panggil updateHueSliderFromBase untuk mengatur slider dan menghasilkan palet awal
             updateHueSliderFromBase();
         });
     </script>
 </body>
-
 </html>
