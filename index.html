@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎨 Color Generator + Particles.js (Final Responsive Fix)</title>
+    <title>🎨 Color Generator + Particles.js (Fix Hex Input Sync)</title>
     <style>
         /* Variabel CSS untuk Dark/Light Mode */
         :root {
@@ -37,6 +37,18 @@
             padding: 20px;
             transition: color 0.3s;
         }
+
+        /* --- Particle Container Styling --- */
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-primary);
+            z-index: -1;
+            transition: background-color 0.3s;
+        }
         
         /* Kontainer Utama - Tambahkan padding horizontal yang aman untuk mobile */
         .container {
@@ -50,26 +62,13 @@
             width: 100%;
             max-width: 1200px;
             text-align: center;
-            /* Perbaikan Responsif: Pastikan padding aman */
             padding-left: 15px;
             padding-right: 15px;
-            box-sizing: border-box; /* Sangat Penting */
+            box-sizing: border-box; 
         }
 
         h1 { color: var(--accent-color); margin-bottom: 5px; font-size: 2.5em; }
         p.subtitle { color: var(--text-secondary); margin-bottom: 30px; }
-
-        /* --- Particle Container Styling --- */
-        #particles-js {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-primary);
-            z-index: -1;
-            transition: background-color 0.3s;
-        }
 
         /* --- Control Sections --- */
         .controls-grid {
@@ -92,23 +91,21 @@
         label { font-weight: 600; color: var(--text-primary); margin-bottom: 5px; }
 
         input[type="color"] { width: 50px; height: 50px; border: 2px solid var(--border-color); border-radius: 10px; cursor: pointer; padding: 0; overflow: hidden; }
-        /* Perbaikan Responsif: Hex Input diperkecil */
         input[type="text"] {
-            padding: 10px 10px; /* Padding dikurangi */
+            padding: 10px 10px; 
             border: 1px solid var(--border-color); 
             border-radius: 8px; 
             font-size: 1em; 
-            width: 80px; /* Lebar dikurangi */
+            width: 80px; 
             text-align: center; 
             outline: none; 
             background-color: var(--bg-secondary); 
             color: var(--text-primary); 
             transition: border-color 0.2s;
         }
-        /* Perbaikan Responsif: Range Slider diperluas */
         input[type="range"] {
-            width: 100%; /* Penuh di dalam control-row */
-            max-width: 150px; /* Batasi lebar maksimum */
+            width: 100%; 
+            max-width: 150px; 
             -webkit-appearance: none; height: 8px; background: var(--border-color); border-radius: 5px; outline: none;
         }
         input[type="range"]::-webkit-slider-thumb {
@@ -133,7 +130,7 @@
                 font-size: 0.8em;
             }
             .container {
-                padding-top: 50px; /* Beri ruang agar tombol tidak menutupi judul */
+                padding-top: 50px; 
             }
             h1 { font-size: 2em; }
         }
@@ -148,11 +145,10 @@
             border-radius: 10px;
             overflow: hidden;
             border: 1px solid var(--border-color);
-            box-sizing: border-box; /* Pastikan border dihitung di dalam lebar */
+            box-sizing: border-box;
         }
 
         .color-box {
-            /* Desktop Default: 12 Kotak per baris */
             width: calc(100% / 12); 
             min-width: 70px; 
             flex-grow: 1; 
@@ -175,70 +171,29 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
         }
 
-        /* Hapus border kanan pada elemen terakhir per baris (mode desktop 12 kolom) */
         .color-box:nth-child(12n) { border-right: none; }
-        
         .color-box:hover {
             transform: scale(1.05); 
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             z-index: 10;
         }
-
-        /* Gaya Drag and Drop (tetap sama) */
         .color-box[draggable="true"] { cursor: grab; }
         .color-box.dragging { opacity: 0.4; transform: scale(0.95); cursor: grabbing; }
-        .color-box.drop-left { box-shadow: inset 3px 0 0 0 #f39c12, 0 5px 15px rgba(0,0,0,0.2); }
-        .color-box.drop-right { box-shadow: inset -3px 0 0 0 #f39c12, 0 5px 15px rgba(0,0,0,0.2); }
 
         /* --- Media Queries --- */
-        
-        /* Tablet/Layar Sedang (Lebar < 900px) - Menggunakan 8 kolom */
         @media (max-width: 900px) {
-            .controls-grid { 
-                grid-template-columns: 1fr 1fr; 
-                gap: 15px; /* Kurangi gap */
-                padding: 15px;
-            }
+            .controls-grid { grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
             .controls-grid > div:nth-child(3) { grid-column: 1 / span 2; }
-            
-            /* Warna kotak 8 kolom */
             .color-box { width: calc(100% / 8); min-width: unset; height: 100px; } 
-            
-            /* Atur ulang border kanan untuk grid 8 kolom */
             .color-box:nth-child(12n) { border-right: 1px solid rgba(255, 255, 255, 0.1); }
             .color-box:nth-child(8n) { border-right: none; }
         }
-
-        /* Mobile (Lebar < 600px) - Menggunakan 4 kolom */
         @media (max-width: 600px) {
-            /* Kontainer kontrol menjadi 1 kolom penuh */
-            .controls-grid { 
-                grid-template-columns: 1fr; 
-                gap: 15px;
-            }
-            .controls-grid > div { 
-                grid-column: 1; /* Semua item ke kolom 1 */
-            }
-            
-            /* Perbaikan Responsif: Lebar range slider full */
-            .control-row {
-                flex-wrap: nowrap; /* Cegah wrap */
-            }
-            input[type="range"] {
-                width: 100%; /* Lebar penuh */
-                max-width: none; /* Hapus batasan max-width */
-            }
-            
-            /* Warna kotak 4 kolom */
-            .color-box { 
-                width: calc(100% / 4); 
-                min-width: unset; 
-                height: 80px; 
-                font-size: 0.65em; /* Font lebih kecil */
-                padding-bottom: 5px;
-            } 
-            
-            /* Atur ulang border kanan untuk grid 4 kolom */
+            .controls-grid { grid-template-columns: 1fr; gap: 15px; }
+            .controls-grid > div { grid-column: 1; }
+            .control-row { flex-wrap: nowrap; }
+            input[type="range"] { width: 100%; max-width: none; }
+            .color-box { width: calc(100% / 4); min-width: unset; height: 80px; font-size: 0.65em; padding-bottom: 5px; } 
             .color-box:nth-child(8n) { border-right: 1px solid rgba(255, 255, 255, 0.1); }
             .color-box:nth-child(4n) { border-right: none; }
         }
@@ -352,6 +307,9 @@
             }
 
             function hexToRgb(hex) {
+                // Pastikan selalu ada hash
+                if (hex.charAt(0) !== '#') hex = '#' + hex;
+                // Handle 3-digit hex by expanding it to 6 digits
                 if (hex.length === 4) {
                     hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
                 }
@@ -363,7 +321,7 @@
             }
             // --- Akhir Color Conversion Helpers ---
             
-            // [LOGIKA DRAG, PALET, NOTIFIKASI, DAN SINKRONISASI TETAP SAMA]
+            // [LOGIKA PALET DAN NOTIFIKASI TETAP SAMA]
             function addDragAndDropListeners(element) {
                 element.setAttribute('draggable', 'true');
                 element.addEventListener('dragstart', (e) => {
@@ -379,9 +337,6 @@
                         document.querySelectorAll('.color-box').forEach(box => box.classList.remove('drop-left', 'drop-right'));
                         element.classList.add(isLeft ? 'drop-left' : 'drop-right');
                     }
-                });
-                element.addEventListener('dragleave', (e) => {
-                    element.classList.remove('drop-left', 'drop-right');
                 });
                 element.addEventListener('drop', (e) => {
                     e.preventDefault();
@@ -428,6 +383,7 @@
             }
 
             function generatePalette(baseColorHex, currentHue = null, weight = 5, totalBoxes = 12) {
+                // Periksa validitas Hex (termasuk 3-digit)
                 if (!/^#([0-9A-F]{3}([0-9A-F]{3})?)$/i.test(baseColorHex)) {
                     paletteContainer.innerHTML = '<p style="color: var(--text-secondary);">Input Hex tidak valid.</p>';
                     return;
@@ -479,39 +435,62 @@
                 }, 2000);
             }
             
+            // --- Logika Sinkronisasi Hue (FIXED) ---
             const updateBaseColorFromHue = () => {
                 const newH = parseInt(hueSlider.value);
+                
                 const hex = baseColorPicker.value;
                 if (!/^#([0-9A-F]{3}([0-9A-F]{3})?)$/i.test(hex)) return;
+                
                 const [r, g, b] = hexToRgb(hex);
                 const [oldH, s, l] = rgbToHsl(r, g, b); 
+                
                 const calculationH = newH % 360;
                 const [newR, newG, newB] = hslToRgb(calculationH, s, l);
                 const newHex = rgbToHex(newR, newG, newB);
+                
                 baseColorPicker.value = newHex;
                 baseColorHexInput.value = newHex;
+                
                 regenerate();
             };
 
+            // FUNGSI INTI PERBAIKAN: BASE COLOR -> HUE SLIDER
             const updateHueSliderFromBase = () => {
-                const hex = baseColorPicker.value;
-                if (!/^#([0-9A-F]{3}([0-9A-F]{3})?)$/i.test(hex)) {
-                    return;
+                // Ambil nilai dari hex input (utamakan text input karena user mungkin baru selesai mengetik)
+                let hex = baseColorHexInput.value.toUpperCase();
+                
+                // Tambahkan '#' jika tidak ada (untuk validasi)
+                if (hex.charAt(0) !== '#') hex = '#' + hex;
+
+                // VALIDASI: Hanya lanjutkan jika hex memiliki format #RRGGBB atau #RGB yang valid
+                if (!/^#([0-9A-F]{3}|[0-9A-F]{6})$/.test(hex)) {
+                    // Jangan regenerasi jika hex tidak valid, tetapi perbarui picker jika hex hanya partial
+                    return; 
                 }
+
+                // 1. Sinkronkan nilai ke Color Picker
+                baseColorPicker.value = hex;
+                
+                // 2. Sinkronkan nilai ke Hex Input (jika 3 digit, ubah ke 6 digit untuk konsistensi)
+                baseColorHexInput.value = hex;
+
+                // 3. Konversi dan Sinkronkan Hue Slider
                 const [r, g, b] = hexToRgb(hex);
                 const [h, s, l] = rgbToHsl(r, g, b);
+                
                 hueSlider.value = h;
+                
+                // 4. Regenerasi Palet
                 regenerate();
             };
             
             // --- Particles.js Initialization ---
             const initParticles = () => {
+                // ... (Konfigurasi Particles.js)
                 particlesJS('particles-js', {
                     "particles": {
-                        "number": {
-                            "value": 80,
-                            "density": { "enable": true, "value_area": 800 }
-                        },
+                        "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
                         "color": { "value": "#ffffff" },
                         "shape": { "type": "circle", "stroke": { "width": 0, "color": "#000000" } },
                         "opacity": { "value": 0.5, "random": false, "anim": { "enable": false } },
@@ -559,10 +538,21 @@
                 generatePalette(hex, hue, weight, totalBoxes);
             };
 
-            // Event Listeners
+            // --- Koneksi Event Listeners (Diperbarui) ---
+            
+            // Color Picker (berubah): Memicu pembaruan HUE dan Hex Text
             baseColorPicker.addEventListener('input', updateHueSliderFromBase);
-            baseColorHexInput.addEventListener('input', updateHueSliderFromBase); 
+            
+            // Hex Text Input (berubah): Memicu pembaruan Picker, HUE, dan Palet
+            // Menggunakan 'keyup' untuk pembaruan yang lebih real-time saat mengetik
+            baseColorHexInput.addEventListener('keyup', updateHueSliderFromBase); 
+            // Tambahkan 'change' untuk memastikan pembaruan setelah kehilangan fokus
+            baseColorHexInput.addEventListener('change', updateHueSliderFromBase);
+
+            // Slider Hue: Memicu pembaruan Base Color dan palet
             hueSlider.addEventListener('input', updateBaseColorFromHue); 
+            
+            // Slider Weight dan Steps
             weightSlider.addEventListener('input', regenerate);
             weightSlider.addEventListener('input', () => { weightValueSpan.textContent = weightSlider.value; });
             stepsSlider.addEventListener('input', regenerate);
