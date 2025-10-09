@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎨 Color Generator + Particles.js (Fix Hex Input Sync)</title>
+    <title>🎨 Color Generator + Particles.js (Final Bidirectional Sync Fix)</title>
     <style>
         /* Variabel CSS untuk Dark/Light Mode */
         :root {
@@ -307,9 +307,7 @@
             }
 
             function hexToRgb(hex) {
-                // Pastikan selalu ada hash
                 if (hex.charAt(0) !== '#') hex = '#' + hex;
-                // Handle 3-digit hex by expanding it to 6 digits
                 if (hex.length === 4) {
                     hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
                 }
@@ -383,7 +381,6 @@
             }
 
             function generatePalette(baseColorHex, currentHue = null, weight = 5, totalBoxes = 12) {
-                // Periksa validitas Hex (termasuk 3-digit)
                 if (!/^#([0-9A-F]{3}([0-9A-F]{3})?)$/i.test(baseColorHex)) {
                     paletteContainer.innerHTML = '<p style="color: var(--text-secondary);">Input Hex tidak valid.</p>';
                     return;
@@ -435,7 +432,41 @@
                 }, 2000);
             }
             
-            // --- Logika Sinkronisasi Hue (FIXED) ---
+            // FUNGSI BARU: Color Picker -> Hex Input -> Sync Hue
+            const updateHexFromPicker = () => {
+                const hexFromPicker = baseColorPicker.value.toUpperCase();
+                
+                // 1. Sinkronkan Picker ke Hex Input Text
+                baseColorHexInput.value = hexFromPicker;
+                
+                // 2. Lanjutkan proses sinkronisasi untuk Hue Slider dan Palet
+                synchronizeControlsFromHex();
+            };
+
+            // FUNGSI INTI: Sinkronisasi dari Input Hex (atau setelah Picker berubah)
+            const synchronizeControlsFromHex = () => {
+                let hex = baseColorHexInput.value.toUpperCase();
+                
+                if (hex.charAt(0) !== '#') hex = '#' + hex;
+
+                if (!/^#([0-9A-F]{3}|[0-9A-F]{6})$/.test(hex)) {
+                    return; 
+                }
+
+                // Sinkronkan nilai ke Color Picker (Penting jika user mengetik Hex 3 digit)
+                baseColorPicker.value = hex;
+                baseColorHexInput.value = hex;
+
+                // Konversi dan Sinkronkan Hue Slider
+                const [r, g, b] = hexToRgb(hex);
+                const [h, s, l] = rgbToHsl(r, g, b);
+                
+                hueSlider.value = h;
+                
+                regenerate();
+            };
+
+            // FUNGSI KHUSUS: Hue Slider -> Update Base Color
             const updateBaseColorFromHue = () => {
                 const newH = parseInt(hueSlider.value);
                 
@@ -454,40 +485,9 @@
                 
                 regenerate();
             };
-
-            // FUNGSI INTI PERBAIKAN: BASE COLOR -> HUE SLIDER
-            const updateHueSliderFromBase = () => {
-                // Ambil nilai dari hex input (utamakan text input karena user mungkin baru selesai mengetik)
-                let hex = baseColorHexInput.value.toUpperCase();
-                
-                // Tambahkan '#' jika tidak ada (untuk validasi)
-                if (hex.charAt(0) !== '#') hex = '#' + hex;
-
-                // VALIDASI: Hanya lanjutkan jika hex memiliki format #RRGGBB atau #RGB yang valid
-                if (!/^#([0-9A-F]{3}|[0-9A-F]{6})$/.test(hex)) {
-                    // Jangan regenerasi jika hex tidak valid, tetapi perbarui picker jika hex hanya partial
-                    return; 
-                }
-
-                // 1. Sinkronkan nilai ke Color Picker
-                baseColorPicker.value = hex;
-                
-                // 2. Sinkronkan nilai ke Hex Input (jika 3 digit, ubah ke 6 digit untuk konsistensi)
-                baseColorHexInput.value = hex;
-
-                // 3. Konversi dan Sinkronkan Hue Slider
-                const [r, g, b] = hexToRgb(hex);
-                const [h, s, l] = rgbToHsl(r, g, b);
-                
-                hueSlider.value = h;
-                
-                // 4. Regenerasi Palet
-                regenerate();
-            };
             
             // --- Particles.js Initialization ---
             const initParticles = () => {
-                // ... (Konfigurasi Particles.js)
                 particlesJS('particles-js', {
                     "particles": {
                         "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
@@ -538,18 +538,16 @@
                 generatePalette(hex, hue, weight, totalBoxes);
             };
 
-            // --- Koneksi Event Listeners (Diperbarui) ---
+            // --- Koneksi Event Listeners FINAL ---
             
-            // Color Picker (berubah): Memicu pembaruan HUE dan Hex Text
-            baseColorPicker.addEventListener('input', updateHueSliderFromBase);
+            // 1. Color Picker (berubah): Sinkronkan ke Hex Input Text, lalu ke Hue Slider
+            baseColorPicker.addEventListener('input', updateHexFromPicker);
             
-            // Hex Text Input (berubah): Memicu pembaruan Picker, HUE, dan Palet
-            // Menggunakan 'keyup' untuk pembaruan yang lebih real-time saat mengetik
-            baseColorHexInput.addEventListener('keyup', updateHueSliderFromBase); 
-            // Tambahkan 'change' untuk memastikan pembaruan setelah kehilangan fokus
-            baseColorHexInput.addEventListener('change', updateHueSliderFromBase);
+            // 2. Hex Text Input (berubah): Sinkronkan ke Color Picker, lalu ke Hue Slider
+            baseColorHexInput.addEventListener('keyup', synchronizeControlsFromHex); 
+            baseColorHexInput.addEventListener('change', synchronizeControlsFromHex);
 
-            // Slider Hue: Memicu pembaruan Base Color dan palet
+            // 3. Slider Hue: Sinkronkan Base Color Picker dan Hex Input Text
             hueSlider.addEventListener('input', updateBaseColorFromHue); 
             
             // Slider Weight dan Steps
@@ -559,7 +557,7 @@
             stepsSlider.addEventListener('input', () => { totalBoxesSpan.textContent = stepsSlider.value; });
 
             // Inisialisasi awal
-            updateHueSliderFromBase();
+            synchronizeControlsFromHex();
         });
     </script>
 </body>
